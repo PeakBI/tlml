@@ -134,15 +134,20 @@ clean_data = function(df, column_missing = 0.25, row_missing = 0.5, min_max_leve
     # Replace mising categorical variables with most common
     #these methods could be imptoved...
     i_char = laply(data_clean, function(.x) is.factor(.x) | is.character(.x) | is.logical(.x))
-    data_clean[i_char] = llply( data_clean[i_char], mode_impute)
-
-
+    
     #remove variables with less than min_max_level for max level
     i_no_variation = laply(data_clean[i_char], function(.x){
-        max_level(.x) < min_max_level
-        })
+      max_level(.x) < min_max_level
+    })
+    
+    data_clean[i_char] = llply( data_clean[i_char], mode_impute)
+    
     categorical_data = data_clean[,i_char] [,!i_no_variation]
+    cat('Removed ', sum(i_no_variation), ' catergorical colums with no variation\n')
+    
 
+
+    
 
     # clean numeric var5iables
     i_num = laply( data_clean, is.numeric)
@@ -257,7 +262,7 @@ mode_impute = function(x){
     }
 
 max_level = function(x){
-    table_of_levels = t_dt(x)
+    table_of_levels = table(x)
     max(table_of_levels )
     }
 

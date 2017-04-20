@@ -45,7 +45,7 @@ fit_glm = function(mm, response, train){
     }
     
     
- fit_xgboost = function(mm, response, train,plot_it = FALSE, nrounds = 100, ...){
+ fit_xgboost = function(mm, response, train,plot_it = FALSE,  ...){
     library(xgboost)
     #error checks
     if(nrow(mm) != length(response)) stop('mm not equal to response length')
@@ -53,12 +53,15 @@ fit_glm = function(mm, response, train){
     
     if(!is.logical(train)) stop('train is no logical')
     if(!is.logical(response)) stop('response is not logical')
-
+   
     dtrain <- xgb.DMatrix(data =  mm[train,], label=response [train])
-    dtest  <- xgb.DMatrix(data =  mm[!train,], label=response [!train])
-    watchlist <- list(train=dtrain, test=dtest)
-    bst <- xgb.train(data=dtrain,  watchlist=watchlist, eval.metric = "error",eval.metric = 'logloss', eval.metric = "auc",  objective = "binary:logistic", nrounds = nrounds, ...)
+   
+   cv <- xgb.cv(data = dtrain , nrounds = 2000,...,
+                nthread = 4, nfold = 5, metrics = list("auc"), objective = "binary:logistic", early_stopping_rounds = 5)
 
+   bst = xgboost(data = dtrain , ...,
+                            nrounds = cv$best_iteration, objective = "binary:logistic")
+   
     boost_test_pred <- predict(bst, mm[!train,])
     out = list(bst = bst)
     out$out_of_bag = data.frame(predicted = boost_test_pred , actual = response [!train])
