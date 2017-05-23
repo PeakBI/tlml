@@ -12,4 +12,18 @@ auc = function (predicted_prob, actual_class) {
      if(length(predicted_class) != length(predicted_class)) stop('vector lengths do not match')
      
      sum(predicted_class == actual_class) / length(actual_class)
-     }
+ }
+ 
+ # Function that returns Root Mean Squared Error
+ rmse <- function(predicted, actual)
+ {
+   error = predicted - actual
+   sqrt(mean(error^2))
+ }
+ 
+ mae <- function(predicted, actual)
+ {
+   error = predicted - actual
+   median(abs(error))
+ }
+ 

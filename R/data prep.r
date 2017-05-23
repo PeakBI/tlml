@@ -1,3 +1,55 @@
+is_date_ish = function(x, orders = c("ymd", "ymd HMS"), ...){
+  oldw <- getOption("warn")
+  options(warn = -1)
+  
+  try_date = parse_date_time(x, orders = orders , ...)
+  options(warn = oldw)
+  all_na = all(is.na(try_date))
+  !all_na
+}
+
+make_diff_dates = function(df, ...){
+  library(lubridate)
+  
+
+  
+  to_date = function(x, orders = c("ymd", "ymd HMS"), ... ){
+    oldw <- getOption("warn")
+    options(warn = -1)
+    d = parse_date_time(x, orders = orders, ... )
+    options(warn = oldw)
+    as.Date(d)
+  }
+  i_date = map_lgl(df, is_date_ish,  ...)
+  date_df = map_df(df[i_date ] , to_date, ...)
+  date_df = map_df( date_df, as.numeric) 
+  dates_matrix = as.matrix(date_df)
+  
+  number_of_cols = ncol(dates_matrix)
+  number_of_rows = nrow(dates_matrix)
+  
+  diff_dates = matrix(ncol = number_of_cols^2, nrow = number_of_rows)
+  dimnames(diff_dates) <- list(rownames(diff_dates, do.NULL = FALSE, prefix = "row"),
+                               colnames(diff_dates, do.NULL = FALSE, prefix = "col"))
+  new_names =  matrix(data = '', nrow = number_of_cols^2, ncol = 2, byrow = FALSE, dimnames = NULL)
+  
+  
+  index = 0
+  for (i in 1:number_of_cols){
+    for(j in 1:number_of_cols){
+      index = index + 1
+      diff_dates [,index] = as.integer(dates_matrix[,i] - dates_matrix[,j])
+      new_names[index,1] =  colnames(dates_matrix)[i] 
+      new_names[index,2] =  colnames(dates_matrix)[j] 
+    }
+  }
+  
+  colnames(diff_dates) = paste(new_names[,1] , new_names[,2] , sep = '_diff_')
+  
+  diff_dates = as.data.frame(diff_dates)
+  diff_dates
+  
+}
 
 poly_df = function(x, degree  = 3){
 
