@@ -293,7 +293,7 @@ median_impute <- function(x){
 
 mode_factor = function(x){
     i_na = is.na(x)
-    if(require("text")){
+    if(require("tomr")){
         table_of_levels = t_dt(x[!i_na ])
         }
     else   table_of_levels = table(x[!i_na ])
